@@ -1,5 +1,6 @@
-package me.tomassetti.turin;
+package me.tomassetti.turin.maven;
 
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 
@@ -13,10 +14,12 @@ import java.io.File;
 /**
  * Compile Turin files
  */
-@Mojo( name = "compileTurin", defaultPhase = LifecyclePhase.COMPILE )
-public class CompileMojo
-    extends AbstractMojo
+@Mojo( name = "compile-turin", defaultPhase = LifecyclePhase.COMPILE )
+public class TurinCompileMojo extends AbstractMojo
 {
+    @Parameter( defaultValue = "${project.artifact}", readonly = true, required = true )
+    private Artifact projectArtifact;
+
     /**
      * Location of the file.
      */
