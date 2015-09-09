@@ -9,6 +9,7 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 
 import java.io.File;
 import java.util.Scanner;
@@ -19,11 +20,17 @@ import java.util.Scanner;
 @Mojo( name = "compile-turin", defaultPhase = LifecyclePhase.COMPILE )
 public class TurinCompileMojo extends AbstractMojo
 {
-    @Parameter( defaultValue = "${project.artifact}", readonly = true, required = true )
-    private Artifact projectArtifact;
+    //@Parameter( defaultValue = "${project.artifact}", readonly = true, required = true )
+    //private Artifact projectArtifact;
 
-    @Parameter( defaultValue = "${project.basedir}/src/main/turin", property = "srcDir", required = true )
-    private File sourceDirectory;
+    //@Parameter( defaultValue = "${project.basedir}/src/main/turin", property = "srcDir", required = true )
+    //private File sourceDirectory;
+
+    //@Parameter( defaultValue = "${project}", readonly = true )
+    //private MavenProject project;
+
+    @Component
+    protected MavenProject project;
 
     /**
      * Location of the file.
@@ -39,8 +46,13 @@ public class TurinCompileMojo extends AbstractMojo
         return scanner.getIncludedFiles();
     }*/
 
+    public void setProject( MavenProject project ) {
+        this.project = project;
+    }
+
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
-        getLog().info("Turin Maven Plugin - Running on "+ projectArtifact);
+        getLog().info("Turin Maven Plugin - Running on "+ project.getName());
     }
 }

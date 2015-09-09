@@ -19,8 +19,16 @@
                 <groupId>me.tomassetti.turin</groupId>
                 <artifactId>turin-maven-plugin</artifactId>
                 <version>0.1-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <goals><goal>compile-turin</goal></goals>
+                    </execution>
+                </executions>
+                <!--<extensions>true</extensions>-->
                 <configuration>
+                    <!--<project implementation="org.apache.maven.plugin.testing.stubs.MavenProjectStub"/>-->
                 </configuration>
+
             </plugin>
         </plugins>
     </build>
