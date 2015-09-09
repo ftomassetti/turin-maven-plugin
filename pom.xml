@@ -78,7 +78,22 @@
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>me.tomassetti</groupId>
+          <artifactId>turin-compiler</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+      </dependency>
   </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>10.0.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
   <build>
     <plugins>
