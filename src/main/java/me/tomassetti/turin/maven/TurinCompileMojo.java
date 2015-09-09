@@ -1,7 +1,6 @@
 package me.tomassetti.turin.maven;
 
 import com.google.common.collect.ImmutableList;
-import jdk.nashorn.internal.runtime.options.Options;
 import me.tomassetti.turin.compiler.ClassFileDefinition;
 import me.tomassetti.turin.compiler.Compiler;
 import me.tomassetti.turin.parser.Parser;
@@ -63,6 +62,11 @@ public class TurinCompileMojo extends AbstractMojo
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        if (project == null) {
+            String message = "This task should be performed in a project";
+            getLog().error(message);
+            throw new MojoFailureException(message);
+        }
         getLog().info("Turin Maven Plugin - Running on "+ project.getName());
 
         Parser parser = new Parser();
@@ -88,7 +92,6 @@ public class TurinCompileMojo extends AbstractMojo
 
         // Then we compile all files
         // TODO consider classpath
-        Compiler.Options options = new Compiler.Options();
         Compiler instance = new Compiler(resolver, new Compiler.Options());
         for (TurinFile turinFile : turinFiles) {
             try {
