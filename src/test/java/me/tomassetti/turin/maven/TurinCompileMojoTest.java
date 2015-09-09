@@ -30,13 +30,22 @@ public class TurinCompileMojoTest {
 
     class MyProjectStub extends MavenProjectStub {
 
-        public MyProjectStub(File pom) {
+        @Override
+        public File getBasedir() {
+            return baseDir;
+        }
+
+        private File baseDir;
+
+        public MyProjectStub(File pom, File baseDir) {
+            this.baseDir = baseDir;
             setFile(pom);
             MavenXpp3Reader pomReader = new MavenXpp3Reader();
             Model model;
             try
             {
                 model = pomReader.read( ReaderFactory.newXmlReader(pom ));
+
                 setModel(model);
             }
             catch ( Exception e )
@@ -66,7 +75,9 @@ public class TurinCompileMojoTest {
             List testCompileSourceRoots = new ArrayList();
             testCompileSourceRoots.add( getBasedir() + "/src/test/java" );
             setTestCompileSourceRoots( testCompileSourceRoots );
+
         }
+
     }
 
     @Test
@@ -78,19 +89,11 @@ public class TurinCompileMojoTest {
         TurinCompileMojo mojo = (TurinCompileMojo) this.rule.lookupMojo("compile-turin", pom);
         assertNotNull(mojo);
 
-        mojo.setProject(new MyProjectStub(pom));
-
-        // Create the Maven project by hand (...)
-        //final MavenProject mvnProject = new MavenProject() ;
-        //mvnProject.setFile( pom );
-        //this.rule.setVariableValueToObject( mojo, "project", mvnProject );
-        //assertNotNull( this.rule.getVariableValueFromObject( mojo, "project" ));
-
-        // Execute the mojo
-        //List<Resource> list = mvnProject.getResources();
+        //mojo.setProject(new MyProjectStub(pom, projectCopy));
+        this.rule.setVariableValueToObject( mojo, "project", new MyProjectStub(pom, projectCopy) );
 
 
-        mojo.execute();
+        assertEquals(1, mojo.getTurinSourceDirs().size());
     }
 
 
