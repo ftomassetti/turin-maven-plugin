@@ -1,5 +1,7 @@
 # turin-maven-plugin
-A Maven plugin to compile Turin files
+A Maven plugin to compile [Turin](https://github.com/ftomassetti/turin-programming-language) files
+
+You can add in your POM this:
 
 ```xml
 <build>
@@ -19,3 +21,5 @@ A Maven plugin to compile Turin files
     </plugins>
 </build>
 ```
+
+The plugin will compile your Turin file under `src/main/turin` and put the generated classes under `target/classes`
