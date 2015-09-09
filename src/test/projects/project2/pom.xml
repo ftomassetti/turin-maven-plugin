@@ -8,10 +8,6 @@
 
     <name>A fantastic application written in Turin</name>
 
-    <dependencies>
-
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -23,11 +19,8 @@
                         <goals><goal>compile-turin</goal></goals>
                     </execution>
                 </executions>
-                <!--<extensions>true</extensions>-->
                 <configuration>
-                    <!--<project implementation="org.apache.maven.plugin.testing.stubs.MavenProjectStub"/>-->
                 </configuration>
-
             </plugin>
         </plugins>
     </build>
