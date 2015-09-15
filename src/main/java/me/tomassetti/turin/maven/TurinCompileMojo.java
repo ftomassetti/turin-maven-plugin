@@ -10,13 +10,12 @@ import me.tomassetti.turin.parser.analysis.resolvers.InFileResolver;
 import me.tomassetti.turin.parser.analysis.resolvers.Resolver;
 import me.tomassetti.turin.parser.analysis.resolvers.SrcResolver;
 import me.tomassetti.turin.parser.ast.Position;
-import me.tomassetti.turin.parser.ast.TurinFile;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
@@ -34,15 +33,15 @@ import java.util.stream.Collectors;
 @Mojo( name = "compile-turin", defaultPhase = LifecyclePhase.COMPILE )
 public class TurinCompileMojo extends AbstractMojo
 {
-    /**
-     * @parameter default-value="${project}"
-     * @required
-     * @readonly
-     */
-    protected MavenProject project;
+
+    @Parameter(defaultValue = "${project.name}", required = true)
+    private String projectName;
+
+    @Parameter(defaultValue = "${project.basedir}", required = true)
+    private File projectBasedir;
 
     public List<File> getTurinSourceDirs() {
-        File srcMainTurin = new File(project.getBasedir(), "src/main/turin");
+        File srcMainTurin = new File(projectBasedir, "src/main/turin");
         if (srcMainTurin.exists()) {
             return ImmutableList.of(srcMainTurin);
         } else {
@@ -51,7 +50,7 @@ public class TurinCompileMojo extends AbstractMojo
     }
 
     public File targetDir() {
-        File targetClasses = new File(project.getBasedir(), "target/classes");
+        File targetClasses = new File(projectBasedir, "target/classes");
         return targetClasses;
     }
 
@@ -71,12 +70,17 @@ public class TurinCompileMojo extends AbstractMojo
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (project == null) {
-            String message = "This task should be performed in a project";
+        if (projectName == null) {
+            String message = "This task should be performed in a project (name not set)";
             getLog().error(message);
             throw new MojoFailureException(message);
         }
-        getLog().info("Turin Maven Plugin - Running on "+ project.getName());
+        if (projectBasedir == null) {
+            String message = "This task should be performed in a project (basedir not set)";
+            getLog().error(message);
+            throw new MojoFailureException(message);
+        }
+        getLog().info("Turin Maven Plugin - Running on "+ projectName);
 
         Parser parser = new Parser();
 

@@ -90,9 +90,8 @@ public class TurinCompileMojoTest {
         TurinCompileMojo mojo = (TurinCompileMojo) this.rule.lookupMojo("compile-turin", pom);
         assertNotNull(mojo);
 
-        //mojo.setProject(new MyProjectStub(pom, projectCopy));
-        this.rule.setVariableValueToObject( mojo, "project", new MyProjectStub(pom, projectCopy) );
-
+        this.rule.setVariableValueToObject( mojo, "projectName", new MyProjectStub(pom, projectCopy).getName() );
+        this.rule.setVariableValueToObject( mojo, "projectBasedir", new MyProjectStub(pom, projectCopy).getBasedir() );
 
         assertEquals(1, mojo.getTurinSourceDirs().size());
     }
@@ -106,7 +105,8 @@ public class TurinCompileMojoTest {
         TurinCompileMojo mojo = (TurinCompileMojo) this.rule.lookupMojo("compile-turin", pom);
         assertNotNull(mojo);
 
-        this.rule.setVariableValueToObject( mojo, "project", new MyProjectStub(pom, projectCopy) );
+        this.rule.setVariableValueToObject( mojo, "projectName", new MyProjectStub(pom, projectCopy).getName() );
+        this.rule.setVariableValueToObject( mojo, "projectBasedir", new MyProjectStub(pom, projectCopy).getBasedir() );
 
         mojo.execute();
     }
@@ -120,7 +120,8 @@ public class TurinCompileMojoTest {
         TurinCompileMojo mojo = (TurinCompileMojo) this.rule.lookupMojo("compile-turin", pom);
         assertNotNull(mojo);
 
-        this.rule.setVariableValueToObject( mojo, "project", new MyProjectStub(pom, projectCopy) );
+        this.rule.setVariableValueToObject( mojo, "projectName", new MyProjectStub(pom, projectCopy).getName() );
+        this.rule.setVariableValueToObject( mojo, "projectBasedir", new MyProjectStub(pom, projectCopy).getBasedir() );
 
         mojo.execute();
     }
