@@ -7,8 +7,10 @@ import me.tomassetti.turin.compiler.errorhandling.ErrorCollector;
 import me.tomassetti.turin.parser.Parser;
 import me.tomassetti.turin.parser.TurinFileWithSource;
 import me.tomassetti.turin.parser.analysis.resolvers.*;
+import me.tomassetti.turin.parser.analysis.resolvers.jar.JarTypeResolver;
 import me.tomassetti.turin.parser.analysis.resolvers.jdk.JdkTypeResolver;
 import me.tomassetti.turin.parser.ast.Position;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -33,14 +35,14 @@ import java.util.stream.Collectors;
 public class TurinCompileMojo extends AbstractMojo
 {
 
-    @Parameter(defaultValue = "${project.name}", required = true)
-    private String projectName;
+    @Parameter(required = true, readonly = true, property = "project")
+    protected MavenProject project;
 
-    @Parameter(defaultValue = "${project.basedir}", required = true)
-    private File projectBasedir;
+    @Parameter(required = true, readonly = true, property = "project.compileClasspathElements")
+    protected List<String> classpathElements;
 
     public List<File> getTurinSourceDirs() {
-        File srcMainTurin = new File(projectBasedir, "src/main/turin");
+        File srcMainTurin = new File(project.getBasedir(), "src/main/turin");
         if (srcMainTurin.exists()) {
             return ImmutableList.of(srcMainTurin);
         } else {
@@ -49,7 +51,7 @@ public class TurinCompileMojo extends AbstractMojo
     }
 
     public File targetDir() {
-        File targetClasses = new File(projectBasedir, "target/classes");
+        File targetClasses = new File(project.getBasedir(), "target/classes");
         return targetClasses;
     }
 
@@ -69,17 +71,22 @@ public class TurinCompileMojo extends AbstractMojo
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (projectName == null) {
+        if (project == null) {
+            String message = "This task should be performed in a project (project not set)";
+            getLog().error(message);
+            throw new MojoFailureException(message);
+        }
+        if (project.getName() == null) {
             String message = "This task should be performed in a project (name not set)";
             getLog().error(message);
             throw new MojoFailureException(message);
         }
-        if (projectBasedir == null) {
+        if (project.getBasedir() == null) {
             String message = "This task should be performed in a project (basedir not set)";
             getLog().error(message);
             throw new MojoFailureException(message);
         }
-        getLog().info("Turin Maven Plugin - Running on "+ projectName);
+        getLog().info("Turin Maven Plugin - Running on "+ project.getName());
 
         Parser parser = new Parser();
 
@@ -100,12 +107,23 @@ public class TurinCompileMojo extends AbstractMojo
                 throw new MojoFailureException(message);
             }
         }
-        TypeResolver typeResolver = new ComposedTypeResolver(ImmutableList.of(JdkTypeResolver.getInstance()));
+        TypeResolver typeResolver = new ComposedTypeResolver(ImmutableList.<TypeResolver>builder()
+            .add(JdkTypeResolver.getInstance())
+            .addAll(project.getDependencyArtifacts().stream().map((da) -> {
+                try {
+                    return new JarTypeResolver(da.getFile());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList()))
+            .build());
         Resolver resolver = new ComposedResolver(ImmutableList.of(new InFileResolver(typeResolver), new SrcResolver(turinFiles.stream().map((tf)->tf.getTurinFile()).collect(Collectors.toList()))));
 
         // Then we compile all files
         // TODO consider classpath
-        Compiler instance = new Compiler(resolver, new Compiler.Options());
+        Compiler.Options options = new Compiler.Options();
+        options.setClassPathElements(project.getDependencyArtifacts().stream().map((da) -> da.getFile().getPath()).collect(Collectors.toList()));
+        Compiler instance = new Compiler(resolver, options);
         for (TurinFileWithSource turinFile : turinFiles) {
             ErrorCollector errorCollector = new ErrorCollector() {
                 @Override
@@ -124,4 +142,5 @@ public class TurinCompileMojo extends AbstractMojo
             }
         }
     }
+
 }
