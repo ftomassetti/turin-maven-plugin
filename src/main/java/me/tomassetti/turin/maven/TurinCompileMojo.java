@@ -5,10 +5,9 @@ import me.tomassetti.turin.compiler.ClassFileDefinition;
 import me.tomassetti.turin.compiler.Compiler;
 import me.tomassetti.turin.compiler.errorhandling.ErrorCollector;
 import me.tomassetti.turin.parser.Parser;
-import me.tomassetti.turin.parser.analysis.resolvers.ComposedResolver;
-import me.tomassetti.turin.parser.analysis.resolvers.InFileResolver;
-import me.tomassetti.turin.parser.analysis.resolvers.Resolver;
-import me.tomassetti.turin.parser.analysis.resolvers.SrcResolver;
+import me.tomassetti.turin.parser.TurinFileWithSource;
+import me.tomassetti.turin.parser.analysis.resolvers.*;
+import me.tomassetti.turin.parser.analysis.resolvers.jdk.JdkTypeResolver;
 import me.tomassetti.turin.parser.ast.Position;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -85,32 +84,33 @@ public class TurinCompileMojo extends AbstractMojo
         Parser parser = new Parser();
 
         // First we collect all TurinFiles and we pass it to the resolver
-        List<Parser.TurinFileAndFile> turinFiles = new ArrayList<>();
+        List<TurinFileWithSource> turinFiles = new ArrayList<>();
         for (File sourceDir : getTurinSourceDirs()) {
             try {
                 turinFiles.addAll(parser.parseAllIn(sourceDir));
             } catch (FileNotFoundException e){
                 getLog().error("File not found: " + e.getMessage());
-                throw new MojoFailureException("Turin files cannot be compiled");
+                throw new MojoFailureException("Turin files cannot be compiled: " + e.getMessage());
             } catch (IOException e) {
                 getLog().error("IO problem: " + e.getMessage());
-                throw new MojoFailureException("Turin files cannot be compiled");
+                throw new MojoFailureException("Turin files cannot be compiled: " + e.getMessage());
             } catch (RuntimeException e) {
-                String message = "Turin file cannot be parsed";
+                String message = "Turin file cannot be parsed: " + e.getMessage();
                 getLog().error(message);
                 throw new MojoFailureException(message);
             }
         }
-        Resolver resolver = new ComposedResolver(ImmutableList.of(new InFileResolver(), new SrcResolver(turinFiles.stream().map((tf)->tf.getTurinFile()).collect(Collectors.toList()))));
+        TypeResolver typeResolver = new ComposedTypeResolver(ImmutableList.of(JdkTypeResolver.getInstance()));
+        Resolver resolver = new ComposedResolver(ImmutableList.of(new InFileResolver(typeResolver), new SrcResolver(turinFiles.stream().map((tf)->tf.getTurinFile()).collect(Collectors.toList()))));
 
         // Then we compile all files
         // TODO consider classpath
         Compiler instance = new Compiler(resolver, new Compiler.Options());
-        for (Parser.TurinFileAndFile turinFile : turinFiles) {
+        for (TurinFileWithSource turinFile : turinFiles) {
             ErrorCollector errorCollector = new ErrorCollector() {
                 @Override
                 public void recordSemanticError(Position position, String s) {
-                    getLog().error("[" + turinFile.getFile().getPath()+"] Error at "+position + " : " + s);
+                    getLog().error("[" + turinFile.getSource().getPath()+"] Error at "+position + " : " + s);
                 }
             };
             try {
@@ -118,7 +118,7 @@ public class TurinCompileMojo extends AbstractMojo
                     saveClassFile(classFileDefinition);
                 }
             } catch (RuntimeException e){
-                String message = "Turin file cannot be compiled";
+                String message = "Turin file cannot be compiled: " + e.getMessage();
                 getLog().error(message);
                 throw new MojoFailureException(message);
             }

@@ -2,14 +2,11 @@ package me.tomassetti.turin.maven;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.Resource;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.apache.maven.plugin.testing.MojoRule;
 import org.apache.maven.plugin.testing.resources.TestResources;
 import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
-import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,7 +15,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.*;
 
 public class TurinCompileMojoTest {
