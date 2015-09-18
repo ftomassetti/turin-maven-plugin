@@ -86,7 +86,6 @@ public class TurinCompileMojoTest {
             List testCompileSourceRoots = new ArrayList();
             testCompileSourceRoots.add( getBasedir() + "/src/test/java" );
             setTestCompileSourceRoots( testCompileSourceRoots );
-
         }
 
     }

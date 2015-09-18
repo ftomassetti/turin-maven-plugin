@@ -19,10 +19,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -97,13 +94,16 @@ public class TurinCompileMojo extends AbstractMojo
                 turinFiles.addAll(parser.parseAllIn(sourceDir));
             } catch (FileNotFoundException e){
                 getLog().error("File not found: " + e.getMessage());
+                logException(e);
                 throw new MojoFailureException("Turin files cannot be compiled: " + e.getMessage());
             } catch (IOException e) {
                 getLog().error("IO problem: " + e.getMessage());
+                logException(e);
                 throw new MojoFailureException("Turin files cannot be compiled: " + e.getMessage());
             } catch (RuntimeException e) {
                 String message = "Turin file cannot be parsed: " + e.getMessage();
                 getLog().error(message);
+                logException(e);
                 throw new MojoFailureException(message);
             }
         }
@@ -117,10 +117,9 @@ public class TurinCompileMojo extends AbstractMojo
                 }
             }).collect(Collectors.toList()))
             .build());
-        Resolver resolver = new ComposedResolver(ImmutableList.of(new InFileResolver(typeResolver), new SrcResolver(turinFiles.stream().map((tf)->tf.getTurinFile()).collect(Collectors.toList()))));
+        SymbolResolver resolver = new ComposedSymbolResolver(ImmutableList.of(new InFileSymbolResolver(typeResolver), new SrcSymbolResolver(turinFiles.stream().map((tf)->tf.getTurinFile()).collect(Collectors.toList()))));
 
         // Then we compile all files
-        // TODO consider classpath
         Compiler.Options options = new Compiler.Options();
         options.setClassPathElements(project.getDependencyArtifacts().stream().map((da) -> da.getFile().getPath()).collect(Collectors.toList()));
         Compiler instance = new Compiler(resolver, options);
@@ -138,9 +137,16 @@ public class TurinCompileMojo extends AbstractMojo
             } catch (RuntimeException e){
                 String message = "Turin file cannot be compiled: " + e.getMessage();
                 getLog().error(message);
+                logException(e);
                 throw new MojoFailureException(message);
             }
         }
+    }
+
+    private void logException(Exception ex) {
+        StringWriter errors = new StringWriter();
+        ex.printStackTrace(new PrintWriter(errors));
+        getLog().debug("Exception logged " + errors.toString());
     }
 
 }
