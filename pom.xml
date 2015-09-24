@@ -76,7 +76,7 @@
       <dependency>
           <groupId>me.tomassetti</groupId>
           <artifactId>turin-compiler</artifactId>
-          <version>0.0.1-20150918-SNAPSHOT</version>
+          <version>0.0.1-20150924-SNAPSHOT</version>
       </dependency>
   </dependencies>
     <dependencyManagement>
