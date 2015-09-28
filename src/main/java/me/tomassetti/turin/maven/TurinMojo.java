@@ -61,18 +61,6 @@ public abstract class TurinMojo extends AbstractMojo {
                 throw new MojoFailureException(message);
             }
         }
-        /*System.out.println("FEDERICO1" + project.getDependencyArtifacts());
-        for (Artifact d : project.getDependencyArtifacts()) {
-            System.out.println("FEDERICO2 File " + d.getFile());
-            System.out.println("FEDERICO2 ID " + d.getId());
-            System.out.println("FEDERICO2 AID " + d.getArtifactId());
-            System.out.println("FEDERICO2 C " + d.getClassifier());
-            System.out.println("FEDERICO2 G " + d.getGroupId());
-            System.out.println("FEDERICO2 S " + d.getScope());
-            System.out.println("FEDERICO2 T " + d.getType());
-            System.out.println("FEDERICO2 V " + d.getVersion());
-            System.out.println("FEDERICO2 AA " + d.getArtifactHandler());
-        }*/
         TypeResolver typeResolver = new ComposedTypeResolver(ImmutableList.<TypeResolver>builder()
             .add(JdkTypeResolver.getInstance())
             .addAll(extraTypeResolvers())

@@ -3,11 +3,11 @@ namespace foo
 import turin.test.Test
 
 @Test
-Void fooTestSuccess() {
+void fooTestSuccess() {
     org.junit.Assert.assertEquals(1, bar())
 }
 
 @Test
-Void fooTestFail() {
+void fooTestFail() {
     org.junit.Assert.assertEquals(2, bar())
 }
