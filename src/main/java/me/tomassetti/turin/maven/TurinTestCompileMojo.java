@@ -61,7 +61,7 @@ public class TurinTestCompileMojo extends TurinMojo
             getLog().error(message);
             throw new MojoFailureException(message);
         }
-        getLog().info("Turin Maven Plugin (Test) - Running on "+ project.getName());
+        getLog().info("Turin Maven Plugin (Test compile) - Running on "+ project.getName());
 
         compile();
     }

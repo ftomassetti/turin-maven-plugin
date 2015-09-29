@@ -6,8 +6,3 @@ import turin.test.Test
 void fooTestSuccess() {
     org.junit.Assert.assertEquals(Integer(1), Integer(bar()))
 }
-
-@Test
-void fooTestFail() {
-    org.junit.Assert.assertEquals(Integer(2), Integer(bar()))
-}
