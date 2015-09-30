@@ -4,10 +4,10 @@ import turin.test.Test
 
 @Test
 void fooTestSuccess() {
-    org.junit.Assert.assertEquals(Integer(1), Integer(bar()))
+    org.junit.Assert.assertEquals(1, bar())
 }
 
 @Test
 void fooTestFail() {
-    org.junit.Assert.assertEquals(Integer(2), Integer(bar()))
+    org.junit.Assert.assertEquals(2, bar())
 }

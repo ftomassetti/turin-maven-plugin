@@ -4,5 +4,5 @@ import turin.test.Test
 
 @Test
 void fooTestSuccess() {
-    org.junit.Assert.assertEquals(Integer(1), Integer(bar()))
+    org.junit.Assert.assertEquals(1, bar())
 }
