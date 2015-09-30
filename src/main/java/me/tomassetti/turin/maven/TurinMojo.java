@@ -10,6 +10,7 @@ import me.tomassetti.turin.parser.analysis.resolvers.*;
 import me.tomassetti.turin.parser.analysis.resolvers.compiled.JarTypeResolver;
 import me.tomassetti.turin.parser.analysis.resolvers.jdk.JdkTypeResolver;
 import me.tomassetti.turin.parser.ast.Position;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -17,6 +18,7 @@ import org.apache.maven.project.MavenProject;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,22 +63,30 @@ public abstract class TurinMojo extends AbstractMojo {
                 throw new MojoFailureException(message);
             }
         }
+        List<JarTypeResolver> jarResolvers = new LinkedList<>();
+        List<String> classpathElements = new LinkedList<>();
+        for (Artifact artifact : project.getDependencyArtifacts()) {
+            if (artifact.getFile() == null) {
+                getLog().warn("Null artifact: " + artifact);
+            } else {
+                try {
+                    jarResolvers.add(new JarTypeResolver(artifact.getFile()));
+                    classpathElements.add(artifact.getFile().getPath());
+                } catch (IOException e) {
+                    throw new MojoFailureException("", e);
+                }
+            }
+        }
         TypeResolver typeResolver = new ComposedTypeResolver(ImmutableList.<TypeResolver>builder()
             .add(JdkTypeResolver.getInstance())
             .addAll(extraTypeResolvers())
-            .addAll(project.getDependencyArtifacts().stream().map((da) -> {
-                try {
-                    return new JarTypeResolver(da.getFile());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }).collect(Collectors.toList()))
+            .addAll(jarResolvers)
             .build());
         SymbolResolver resolver = new ComposedSymbolResolver(ImmutableList.of(new InFileSymbolResolver(typeResolver), new SrcSymbolResolver(turinFiles.stream().map((tf)->tf.getTurinFile()).collect(Collectors.toList()))));
 
         // Then we compile all files
         me.tomassetti.turin.compiler.Compiler.Options options = new Compiler.Options();
-        options.setClassPathElements(project.getDependencyArtifacts().stream().map((da) -> da.getFile().getPath()).collect(Collectors.toList()));
+        options.setClassPathElements(classpathElements);
         Compiler instance = new Compiler(resolver, options);
         for (TurinFileWithSource turinFile : turinFiles) {
             ErrorCollector errorCollector = new ErrorCollector() {
