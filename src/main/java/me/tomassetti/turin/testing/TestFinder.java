@@ -4,6 +4,7 @@ import turin.test.Test;
 
 import java.io.File;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,8 +21,11 @@ public class TestFinder {
             if (child.isFile() && child.getName() != null && child.getName().endsWith(".class")) {
                 String qName = qName(path, child);
                 Class clazz = classLoader.loadClass(qName);
-                Test annotation = (Test) clazz.getAnnotation(Test.class);
-                if (annotation != null) {
+                // they could have a different version of the annotation, so we check by name
+                if (Arrays.stream(clazz.getAnnotations())
+                        .filter((a)->a.annotationType().getCanonicalName().equals(Test.class.getCanonicalName()))
+                        .findFirst()
+                        .isPresent()) {
                     testClasses.add(clazz);
                 }
             } else if (child.isDirectory()) {
