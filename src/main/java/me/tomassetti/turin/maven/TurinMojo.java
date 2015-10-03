@@ -88,15 +88,20 @@ public abstract class TurinMojo extends AbstractMojo {
         me.tomassetti.turin.compiler.Compiler.Options options = new Compiler.Options();
         options.setClassPathElements(classpathElements);
         Compiler instance = new Compiler(resolver, options);
+        getLog().info("Files to compile: "+ turinFiles.size());
+        List<String> errors = new ArrayList<>();
         for (TurinFileWithSource turinFile : turinFiles) {
+            getLog().info("Compile "+ turinFile.getSource().getPath());
             ErrorCollector errorCollector = new ErrorCollector() {
                 @Override
                 public void recordSemanticError(Position position, String s) {
-                    getLog().error("[" + turinFile.getSource().getPath()+"] Error at "+position + " : " + s);
+                    getLog().error("[" + turinFile.getSource().getPath() + "] Error at "+position + " : " + s);
+                    errors.add(s);
                 }
             };
             try {
                 for (ClassFileDefinition classFileDefinition : instance.compile(turinFile.getTurinFile(), errorCollector)) {
+                    getLog().info("generate " + classFileDefinition.getName());
                     saveClassFile(classFileDefinition);
                 }
             } catch (RuntimeException e){
@@ -105,6 +110,9 @@ public abstract class TurinMojo extends AbstractMojo {
                 logException(e);
                 throw new MojoFailureException(message);
             }
+        }
+        if (errors.size() > 0) {
+            throw new MojoFailureException("Unable to proceed because of errors");
         }
     }
 

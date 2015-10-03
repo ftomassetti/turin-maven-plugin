@@ -7,18 +7,23 @@ import org.junit.runner.Runner;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.maven.plugin.logging.Log;
 
 public class TurinTestRunner extends Runner {
 
     private TurinTestRunMojo turinTestRunMojo;
     private Class testClass;
+    private Log log;
 
-    public TurinTestRunner(TurinTestRunMojo turinTestRunMojo, Class testClass) {
+    public TurinTestRunner(TurinTestRunMojo turinTestRunMojo, Class testClass, Log log) {
         this.turinTestRunMojo = turinTestRunMojo;
         this.testClass = testClass;
+        this.log = log;
     }
 
     @Override
@@ -38,11 +43,19 @@ public class TurinTestRunner extends Runner {
                 turinTestRunMojo.getLog().warn("Skipping test class " + testClass.getCanonicalName() + " because the expected invoke method is not accessible");
                 runNotifier.fireTestIgnored(getDescription());
             } catch (InvocationTargetException e) {
+                turinTestRunMojo.getLog().warn("Test failing " + testClass.getCanonicalName() + ": " + e.getMessage());
+                logException(e.getTargetException());
                 runNotifier.fireTestFailure(new Failure(getDescription(), e));
             }
         } catch (NoSuchMethodException e) {
             turinTestRunMojo.getLog().warn("Skipping test class " + testClass.getCanonicalName() + " because it has no the expected invoke method");
             runNotifier.fireTestIgnored(getDescription());
         }
+    }
+
+    protected void logException(Throwable ex) {
+        StringWriter errors = new StringWriter();
+        ex.printStackTrace(new PrintWriter(errors));
+        log.debug("Exception logged " + errors.toString());
     }
 }

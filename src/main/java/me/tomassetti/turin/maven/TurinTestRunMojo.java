@@ -125,7 +125,7 @@ public class TurinTestRunMojo extends TurinMojo
 
     private void executeTests(List<Class> testClasses, RunNotifier runNotifier) {
         for (Class clazz : testClasses) {
-            new TurinTestRunner(this, clazz).run(runNotifier);
+            new TurinTestRunner(this, clazz, getLog()).run(runNotifier);
         }
     }
 
