@@ -44,6 +44,7 @@ public class TurinTestRunner extends Runner {
                 runNotifier.fireTestIgnored(getDescription());
             } catch (InvocationTargetException e) {
                 turinTestRunMojo.getLog().warn("Test failing " + testClass.getCanonicalName() + ": " + e.getMessage());
+                turinTestRunMojo.getLog().warn("issue: " + e.getCause().getMessage());
                 logException(e.getTargetException());
                 runNotifier.fireTestFailure(new Failure(getDescription(), e));
             }
